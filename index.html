@@ -355,7 +355,21 @@ const t = k => L[lang][k] || k
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-async function init() {
+async function // Timeout fallback - if loading takes too long
+const _loadTimeout = setTimeout(() => {
+  if (view === 'loading') {
+    console.error('Loading timeout - Supabase may not be reachable')
+    document.getElementById('app').innerHTML =
+      '<div style="text-align:center;padding:40px">' +
+      '<div style="font-size:32px;margin-bottom:10px">📖</div>' +
+      '<div style="font-family:serif;font-size:18px;color:#1B3A5C;margin-bottom:8px">לימוד משניות לעילוי נשמה</div>' +
+      '<div style="font-size:12px;color:#888;margin-bottom:16px">בעיה בטעינה – בדוק חיבור לאינטרנט</div>' +
+      '<button onclick="location.reload()" style="background:#1B3A5C;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px">נסה שוב</button>' +
+      '</div>'
+  }
+}, 8000)
+
+init().then(() => clearTimeout(_loadTimeout)) {
   const params = new URLSearchParams(location.search)
   const slug   = params.get('id')
   const meId   = params.get('me')
