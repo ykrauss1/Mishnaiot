@@ -355,10 +355,9 @@ const t = k => L[lang][k] || k
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-async function // Timeout fallback - if loading takes too long
+// Timeout fallback - if loading takes too long
 const _loadTimeout = setTimeout(() => {
   if (view === 'loading') {
-    console.error('Loading timeout - Supabase may not be reachable')
     document.getElementById('app').innerHTML =
       '<div style="text-align:center;padding:40px">' +
       '<div style="font-size:32px;margin-bottom:10px">📖</div>' +
@@ -369,7 +368,7 @@ const _loadTimeout = setTimeout(() => {
   }
 }, 8000)
 
-init().then(() => clearTimeout(_loadTimeout)) {
+async function init() {
   const params = new URLSearchParams(location.search)
   const slug   = params.get('id')
   const meId   = params.get('me')
@@ -406,7 +405,6 @@ init().then(() => clearTimeout(_loadTimeout)) {
   await loadAssignments()
   view = 'deceased'; render()
 }
-
 async function loadAssignments() {
   const { data } = await sb.from('assignments')
     .select('*, slots:learner_slots(id,learner_id,learner_name,part,status)')
