@@ -359,7 +359,7 @@ async function init() {
   const { data: { session } } = await sb.auth.getSession()
   if (session?.user) {
     authUser = session.user
-    const { data: p } = await sb.from('profiles').select('*').eq('id', authUser.id).single()
+    const { data: p } = await sb.from('mishnayot_profiles').select('*').eq('id', authUser.id).single()
     profile = p
   }
 
@@ -427,8 +427,15 @@ function render() {
 // ── TOPBAR HELPER ──
 function topbar(extra='') {
   const langBtn = lang==='he'?'English':'עברית'
+  const userBadge = authUser && profile
+    ? `<span style="font-size:11px;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:4px">
+        ${profile.is_superadmin ? '<span style="font-size:13px" title="סופר-מנהל">👑</span>' : ''}
+        <span>${profile.full_name||authUser.email}</span>
+       </span>`
+    : ''
   const right = authUser
-    ? `<span class="top-link" onclick="view='creator-panel';render()">${t('myPanel')}</span>
+    ? `${userBadge}
+       <span class="top-link" onclick="view='creator-panel';render()">${t('myPanel')}</span>
        <span class="top-link" onclick="doLogout()">${t('logout')}</span>`
     : `<span class="top-link" onclick="view='auth';render()">${t('login')}</span>`
   return `<div class="topbar">
@@ -833,7 +840,7 @@ async function doLogin() {
   const {data,error}=await sb.auth.signInWithPassword({email,password:pass})
   if(error){msg.innerHTML=`<div class="auth-err">${t('loginErr')}: ${error.message}</div>`;return}
   authUser=data.user
-  const {data:p}=await sb.from('profiles').select('*').eq('id',authUser.id).single()
+  const {data:p}=await sb.from('mishnayot_profiles').select('*').eq('id',authUser.id).single()
   profile=p; view='creator-panel'; render(); loadMyDeceased()
 }
 
@@ -849,7 +856,7 @@ async function doRegister() {
   if(error){msg.innerHTML=`<div class="auth-err">${t('registerErr')}: ${error.message}</div>`;return}
   // Update profile with phone & relation
   if(data.user){
-    await sb.from('profiles').update({full_name:name,phone,relation}).eq('id',data.user.id)
+    await sb.from('mishnayot_profiles').update({full_name:name,phone,relation}).eq('id',data.user.id)
   }
   msg.innerHTML=`<div class="auth-ok">${t('checkEmail')}</div>`
 }
@@ -940,7 +947,7 @@ async function doDelete(id) {
 async function loadSuperadminData() {
   const [{data:pages},{data:users},{data:learners}]=await Promise.all([
     sb.from('deceased').select('*,profiles(full_name,email,phone)',{count:'exact'}),
-    sb.from('profiles').select('*',{count:'exact'}),
+    sb.from('mishnayot_profiles').select('*',{count:'exact'}),
     sb.from('learners').select('id',{count:'exact'}),
   ])
   const sn=document.getElementById('sa-pages'); if(sn)sn.textContent=pages?.length||0
@@ -1025,7 +1032,7 @@ function daysLeft(d){const dt=new Date(d+'T12:00:00');dt.setDate(dt.getDate()+30
 sb.auth.onAuthStateChange(async(event,session)=>{
   if(event==='SIGNED_IN'&&session?.user&&!authUser){
     authUser=session.user
-    const {data:p}=await sb.from('profiles').select('*').eq('id',authUser.id).single()
+    const {data:p}=await sb.from('mishnayot_profiles').select('*').eq('id',authUser.id).single()
     profile=p
   }
 })
