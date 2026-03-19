@@ -580,36 +580,33 @@ function renderCreatorPanel() {
 // NEW DECEASED FORM
 // ══════════════════════════════════════════
 function renderNewDeceased() {
-  // HEB_MONTHS defined globally
-  // HEB_DAYS defined globally
-  // HEB_YEARS defined globally
+  const dayOpts   = HEB_DAYS.map((d,i) => `<option value='${i+1}'>${d}</option>`).join('')
+  const monthOpts = HEB_MONTHS.map((m,i) => `<option value='${i+1}'>${m}</option>`).join('')
+  const yearOpts  = HEB_YEARS_DISPLAY.map((y,i) => `<option value='${y}' ${i===2?'selected':''}>${y}</option>`).join('')
 
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar()}
-    <div class="page-wrap">
+    <div class="page-wrap" style="max-width:480px;margin:0 auto;width:100%">
       <div style="margin-bottom:14px">
-        <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px;display:flex;align-items:center;gap:4px">
-          ← חזרה
-        </span>
+        <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px">← חזרה</span>
       </div>
 
-      <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:32px;margin-bottom:6px">📖</div>
-        <div style="font-family:'Frank Ruhl Libre',serif;font-size:22px;font-weight:700;color:var(--blue-deep)">צור דף נפטר</div>
-        <div style="font-size:12px;color:#999;margin-top:4px">הדף יישלח לבני המשפחה לתיאום לימוד משניות</div>
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:28px;margin-bottom:4px">📖</div>
+        <div style="font-family:'Frank Ruhl Libre',serif;font-size:20px;font-weight:700;color:var(--blue-deep)">צור דף נפטר</div>
+        <div style="font-size:11px;color:#999;margin-top:3px">הדף יישלח לבני המשפחה לתיאום לימוד משניות</div>
       </div>
 
       <div id="create-msg"></div>
 
       <!-- שם הנפטר -->
-      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-          <span>👤</span> שם הנפטר
-        </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">👤 שם הנפטר</div>
         <div class="form-group">
           <label>בעברית</label>
-          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)" style="font-family:'Frank Ruhl Libre',serif;font-size:16px">
+          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)"
+            style="font-family:'Frank Ruhl Libre',serif;font-size:15px">
         </div>
         <div class="form-group" style="margin-bottom:0">
           <label>באנגלית (אופציונלי)</label>
@@ -618,43 +615,43 @@ function renderNewDeceased() {
       </div>
 
       <!-- תאריך פטירה -->
-      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-          <span>📅</span> תאריך פטירה
-        </div>
+      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📅 תאריך פטירה</div>
 
-        <!-- Toggle עברי/לועזי -->
-        <div style="display:flex;background:#F0F0F0;border-radius:8px;padding:3px;margin-bottom:14px">
+        <!-- Toggle -->
+        <div style="display:flex;background:#F0F0F0;border-radius:8px;padding:3px;margin-bottom:12px;width:200px">
           <div id="tab-heb" onclick="setDateMode('heb')"
-            style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--blue-deep);color:#fff">
+            style="flex:1;text-align:center;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--blue-deep);color:#fff;transition:all .2s">
             עברי
           </div>
           <div id="tab-greg" onclick="setDateMode('greg')"
-            style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#888">
+            style="flex:1;text-align:center;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#888;transition:all .2s">
             לועזי
           </div>
         </div>
 
         <!-- בחירת תאריך עברי -->
         <div id="heb-picker">
-          <label style="font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:6px">בחר תאריך עברי</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="display:grid;grid-template-columns:80px 1fr 110px;gap:8px">
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">יום</label>
-              <select id="heb-day" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${HEB_DAYS.map((d,i)=>`<option value='${i+1}'>${d}</option>`).join('')}
+              <select id="heb-day" onchange="onHebDateChange()"
+                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
+                ${dayOpts}
               </select>
             </div>
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">חודש</label>
-              <select id="heb-month" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:12px;font-family:'Heebo',sans-serif">
-                ${HEB_MONTHS.map((m,i)=>`<option value='${i+1}'>${m}</option>`).join('')}
+              <select id="heb-month" onchange="onHebDateChange()"
+                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
+                ${monthOpts}
               </select>
             </div>
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">שנה</label>
-              <select id="heb-year" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${HEB_YEARS_DISPLAY.map((y,i)=>`<option value='${y}' ${i===2?'selected':''}>${y}</option>`).join('')}
+              <select id="heb-year" onchange="onHebDateChange()"
+                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
+                ${yearOpts}
               </select>
             </div>
           </div>
@@ -662,53 +659,50 @@ function renderNewDeceased() {
 
         <!-- בחירת תאריך לועזי -->
         <div id="greg-picker" style="display:none">
-          <div class="form-group" style="margin-bottom:0">
-            <label>תאריך לועזי</label>
-            <input id="d-death-greg" type="date" onchange="onGregDateChange(this.value)">
-          </div>
+          <input id="d-death-greg" type="date" onchange="onGregDateChange(this.value)"
+            style="width:100%;padding:9px 11px;border:1.5px solid #DDD;border-radius:8px;font-size:13px">
         </div>
 
         <!-- תוצאה -->
-        <div id="date-result" style="display:none;margin-top:12px;background:var(--teal-light);border-radius:8px;padding:10px 14px;border:1px solid rgba(29,107,90,.2)">
-          <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:4px">תאריכים שחושבו:</div>
-          <div style="display:flex;justify-content:space-between;font-size:12px">
-            <span>פטירה: <strong id="res-death-heb"></strong></span>
-            <span id="res-death-greg" style="color:#888"></span>
+        <div id="date-loading" style="display:none;text-align:center;padding:8px;font-size:11px;color:#888;margin-top:8px">מחשב... ⏳</div>
+        <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:7px 10px;font-size:11px;color:#8B2020;margin-top:8px"></div>
+        <div id="date-result" style="display:none;margin-top:10px;background:var(--teal-light);border-radius:8px;padding:10px 12px;border:1px solid rgba(29,107,90,.2)">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
+            <span style="color:#888;font-size:10px">פטירה</span>
+            <span><strong id="res-death-heb" style="font-family:'Frank Ruhl Libre',serif"></strong>
+              <span id="res-death-greg" style="color:#888;font-size:10px;margin-right:6px"></span></span>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px">
-            <span>יום השלושים: <strong id="res-day30-heb" style="color:var(--gold)"></strong></span>
-            <span id="res-day30-greg" style="color:#888"></span>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+            <span style="color:#888;font-size:10px">יום השלושים</span>
+            <span><strong id="res-day30-heb" style="color:var(--gold);font-family:'Frank Ruhl Libre',serif"></strong>
+              <span id="res-day30-greg" style="color:#888;font-size:10px;margin-right:6px"></span></span>
           </div>
         </div>
-        <div id="date-loading" style="display:none;text-align:center;padding:10px;font-size:12px;color:#888">מחשב תאריכים... ⏳</div>
-        <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:8px 12px;font-size:12px;color:#8B2020;margin-top:8px"></div>
 
-        <!-- שדות נסתרים לשמירה -->
+        <!-- שדות נסתרים -->
         <input type="hidden" id="d-heb-date">
         <input type="hidden" id="d-day30">
         <input type="hidden" id="d-death">
       </div>
 
-      <!-- מזהה הדף -->
-      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;border:1.5px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px">
-          <span>🔗</span> קישור לשיתוף
-        </div>
-        <div style="font-size:11px;color:#888;margin-bottom:10px">יישלח לבני המשפחה כדי שיבחרו מסכת</div>
-        <div style="background:#F5F0E8;border-radius:8px;padding:10px 12px;font-size:11px;font-family:monospace;color:#888;margin-bottom:10px;word-break:break-all">
-          ykrauss1.github.io/Mishnaiot/?id=<strong id="slug-preview" style="color:var(--blue-deep)">...</strong>
+      <!-- קישור -->
+      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔗 קישור לשיתוף</div>
+        <div style="background:#F5F0E8;border-radius:7px;padding:8px 10px;font-size:11px;color:#888;margin-bottom:8px;word-break:break-all;font-family:monospace">
+          .../?id=<strong id="slug-preview" style="color:var(--blue-deep)">...</strong>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label>מזהה (נוצר אוטומטית, ניתן לשנות)</label>
+          <label>מזהה (נוצר אוטומטית)</label>
           <input id="d-slug" dir="ltr" placeholder="yosef-cohen"
             oninput="this.dataset.manualEdit='1';this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-');document.getElementById('slug-preview').textContent=this.value||'...'">
         </div>
       </div>
 
-      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()" style="padding:13px;font-size:15px">
+      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()"
+        style="padding:12px;font-size:14px;border-radius:10px">
         צור דף נפטר ←
       </button>
-      <div style="height:20px"></div>
+      <div style="height:24px"></div>
     </div>
   </div>`
 }
