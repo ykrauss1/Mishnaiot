@@ -350,13 +350,7 @@ const t = k => L[lang][k] || k
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-async function init().catch(e => {
-  console.error('Init error:', e)
-  document.getElementById('app').innerHTML = 
-    '<div style="text-align:center;padding:60px"><div style="font-size:32px;margin-bottom:12px">📖</div>' +
-    '<div style="font-family:serif;font-size:18px;color:#1B3A5C;margin-bottom:8px">לימוד משניות לעילוי נשמה</div>' +
-    '<div style="font-size:12px;color:#888">שגיאת טעינה: ' + e.message + '</div></div>'
-}) {
+async function init() {
   const params = new URLSearchParams(location.search)
   const slug   = params.get('id')
   const meId   = params.get('me')
