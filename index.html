@@ -488,13 +488,63 @@ function renderLoginForm() {
 
 function renderRegisterForm() {
   return `
-  <div class="form-group"><label>${t('fullName')}</label><input id="a-name" placeholder="${t('fullName')}"></div>
-  <div class="form-row">
-    <div class="form-group"><label>${t('email')}</label><input id="a-email" type="email" placeholder="you@example.com" dir="ltr"></div>
-    <div class="form-group"><label>${t('phone')}</label><input id="a-phone" type="tel" placeholder="+972..." dir="ltr"></div>
+  <div class="form-group">
+    <label>${t('fullName')}</label>
+    <input id="a-name" placeholder="${t('fullName')}">
   </div>
-  <div class="form-group"><label>${t('relation')}</label><input id="a-relation" placeholder="בן, אח, חבר..."></div>
-  <div class="form-group"><label>${t('password')}</label><input id="a-pass" type="password" placeholder="לפחות 6 תווים"></div>
+  <div class="form-group">
+    <label>${t('email')}</label>
+    <input id="a-email" type="email" placeholder="you@example.com" dir="ltr">
+  </div>
+  <div class="form-group">
+    <label>${t('phone')}</label>
+    <div style="display:flex;gap:6px">
+      <select id="a-phone-cc" style="width:90px;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif;flex-shrink:0">
+        <option value="+972">🇮🇱 +972</option>
+        <option value="+1">🇺🇸 +1</option>
+        <option value="+44">🇬🇧 +44</option>
+        <option value="+33">🇫🇷 +33</option>
+        <option value="+49">🇩🇪 +49</option>
+        <option value="+39">🇮🇹 +39</option>
+        <option value="+7">🇷🇺 +7</option>
+      </select>
+      <input id="a-phone" type="tel" placeholder="050-000-0000" dir="ltr" style="flex:1">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>${t('relation')}</label>
+    <select id="a-relation">
+      <option value="">-- בחר --</option>
+      <option value="בן/בת">בן / בת</option>
+      <option value="אב/אם">אב / אם</option>
+      <option value="אח/אחות">אח / אחות</option>
+      <option value="הורה">הורה</option>
+      <option value="בן/בת זוג">בן / בת זוג</option>
+      <option value="נכד/ה">נכד / נכדה</option>
+      <option value="סב/סבתא">סב / סבתא</option>
+      <option value="חבר/ה">חבר / חברה</option>
+      <option value="תלמיד/ה">תלמיד / תלמידה</option>
+      <option value="שכן/ה">שכן / שכנה</option>
+      <option value="עמית">עמית לעבודה</option>
+      <option value="אחר">אחר</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>${t('password')}</label>
+    <div style="position:relative">
+      <input id="a-pass" type="password" placeholder="לפחות 6 תווים" style="padding-left:36px">
+      <span onclick="togglePass('a-pass','eye1')" id="eye1"
+        style="position:absolute;left:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:#888;user-select:none">👁</span>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>אימות סיסמה</label>
+    <div style="position:relative">
+      <input id="a-pass2" type="password" placeholder="הקלד שוב" style="padding-left:36px">
+      <span onclick="togglePass('a-pass2','eye2')" id="eye2"
+        style="position:absolute;left:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:#888;user-select:none">👁</span>
+    </div>
+  </div>
   <button class="btn btn-primary btn-full" onclick="doRegister()">${t('registerBtn')}</button>`
 }
 
@@ -529,25 +579,59 @@ function renderNewDeceased() {
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar()}
     <div class="page-wrap">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="margin-bottom:16px">
         <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px">← ${t('myDeceased')}</span>
       </div>
-      <div class="page-title">${t('createDeceasedTitle')}</div>
+      <div class="page-title">צור דף נפטר</div>
       <div id="create-msg"></div>
-      <div class="form-group"><label>${t('decNameHe')}</label><input id="d-name-he" placeholder="ר' יוסף בן אברהם"></div>
-      <div class="form-group"><label>${t('decNameEn')}</label><input id="d-name-en" placeholder="R' Yosef ben Avraham" dir="ltr"></div>
-      <div class="form-group"><label>${t('decDeathDate')}</label><input id="d-death" type="date">
-        <small>${t('decHebDate')}: <input id="d-heb-date" style="display:inline;width:auto;padding:3px 7px;font-size:11px;border:1px solid #DDD;border-radius:5px;margin-right:4px" placeholder='ט"ז שבט תשפ"ו'></small>
+
+      <div class="card-box" style="margin-bottom:12px">
+        <div class="card-title">פרטי הנפטר</div>
+        <div class="form-group">
+          <label>שם הנפטר (עברית)</label>
+          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)">
+        </div>
+        <div class="form-group">
+          <label>שם (אנגלית, אופציונלי)</label>
+          <input id="d-name-en" placeholder="R' Yosef ben Avraham" dir="ltr">
+        </div>
       </div>
-      <div class="form-group"><label>${t('decDay30Heb')}</label>
-        <input id="d-day30" placeholder='י"ז אדר תשפ"ו'>
-        <small>ניתן לחשב ב-<a href="https://www.hebcal.com/converter" target="_blank">hebcal.com</a></small>
+
+      <div class="card-box" style="margin-bottom:12px">
+        <div class="card-title">תאריכים</div>
+        <div class="form-group">
+          <label>תאריך פטירה (עברי)</label>
+          <input id="d-heb-date" placeholder='כגון: ט"ז שבט תשפ"ו'>
+          <small style="color:#AAA">לחיפוש המרה: <a href="https://www.hebcal.com/converter" target="_blank" style="color:var(--blue-mid)">hebcal.com/converter</a></small>
+        </div>
+        <div class="form-group">
+          <label>תאריך פטירה (לועזי)</label>
+          <input id="d-death" type="date" onchange="calcDay30(this.value)">
+          <small style="color:#AAA">לחישוב אוטומטי של יום השלושים</small>
+        </div>
+        <div class="form-group">
+          <label>יום השלושים (עברי)</label>
+          <div style="position:relative">
+            <input id="d-day30" placeholder="יחושב אוטומטית...">
+            <span id="d-day30-loader" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#888">מחשב...</span>
+          </div>
+        </div>
       </div>
-      <div class="form-group"><label>${t('decSlug')}</label>
-        <input id="d-slug" placeholder="yosef-cohen" dir="ltr" oninput="this.value=this.value.replace(/[^a-z0-9-]/g,'')">
-        <small>${t('slugHint')}</small>
+
+      <div class="card-box" style="margin-bottom:14px">
+        <div class="card-title">קישור לשיתוף</div>
+        <div class="form-group">
+          <label>מזהה הדף</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:12px;color:#888;white-space:nowrap">mishnaiot.github.io/?id=</span>
+            <input id="d-slug" placeholder="yosef-cohen" dir="ltr" style="flex:1"
+              oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')">
+          </div>
+          <small>יווצר אוטומטית מהשם. ניתן לשנות – אותיות לועזיות וקווים בלבד</small>
+        </div>
       </div>
-      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()">${t('createBtn')}</button>
+
+      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()">צור דף נפטר</button>
     </div>
   </div>`
 }
@@ -830,6 +914,48 @@ function renderRemindTab() {
 // ACTIONS
 // ══════════════════════════════════════════
 function toggleLang() { lang=lang==='he'?'en':'he'; render() }
+
+function togglePass(inputId, eyeId) {
+  const inp = document.getElementById(inputId)
+  const eye = document.getElementById(eyeId)
+  if (!inp) return
+  if (inp.type === 'password') { inp.type = 'text'; if(eye) eye.textContent = '🙈' }
+  else { inp.type = 'password'; if(eye) eye.textContent = '👁' }
+}
+
+function autoSlug(name) {
+  const slug = document.getElementById('d-slug')
+  if (!slug || slug.dataset.manualEdit) return
+  // Transliterate common Hebrew letters
+  const map = {'א':'a','ב':'b','ג':'g','ד':'d','ה':'h','ו':'v','ז':'z','ח':'ch','ט':'t',
+    'י':'y','כ':'k','ל':'l','מ':'m','נ':'n','ס':'s','ע':'a','פ':'p','צ':'tz','ק':'k',
+    'ר':'r','ש':'sh','ת':'t','ך':'k','ם':'m','ן':'n','ף':'p','ץ':'tz'}
+  let s = name.split('').map(c => map[c]||'').join('')
+  s = s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)
+  if (s) slug.value = s
+}
+
+async function calcDay30(dateStr) {
+  if (!dateStr) return
+  const loader = document.getElementById('d-day30-loader')
+  const field  = document.getElementById('d-day30')
+  if (loader) loader.style.display = 'block'
+  if (field)  field.value = ''
+  try {
+    // Calculate gregorian date + 30 days
+    const d = new Date(dateStr + 'T12:00:00')
+    d.setDate(d.getDate() + 30)
+    const y = d.getFullYear(), m = d.getMonth()+1, day = d.getDate()
+    // Fetch Hebrew date from Hebcal API
+    const res = await fetch('https://www.hebcal.com/converter?cfg=json&gy='+y+'&gm='+m+'&gd='+day+'&g2h=1')
+    const data = await res.json()
+    if (field && data.hebrew) field.value = data.hebrew
+  } catch(e) {
+    if (field) field.placeholder = 'לא ניתן לחשב אוטומטית – מלא ידנית'
+  } finally {
+    if (loader) loader.style.display = 'none'
+  }
+}
 function setTab(i)    { activeTab=i; render() }
 function openM(n)     { selectedM=n; selectedPart=null; render() }
 function closeM()     { selectedM=null; selectedPart=null; render() }
@@ -849,18 +975,22 @@ async function doLogin() {
 }
 
 async function doRegister() {
-  const name=document.getElementById('a-name')?.value?.trim()
-  const email=document.getElementById('a-email')?.value?.trim()
-  const phone=document.getElementById('a-phone')?.value?.trim()
-  const relation=document.getElementById('a-relation')?.value?.trim()
-  const pass=document.getElementById('a-pass')?.value
-  const msg=document.getElementById('auth-msg')
-  if(!name||!email||!pass){msg.innerHTML=`<div class="auth-err">נא למלא שם, מייל וסיסמה</div>`;return}
-  const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}})
-  if(error){msg.innerHTML=`<div class="auth-err">${t('registerErr')}: ${error.message}</div>`;return}
-  // Update profile with phone & relation
-  if(data.user){
-    await sb.from('mishnayot_profiles').update({full_name:name,phone,relation}).eq('id',data.user.id)
+  const name     = document.getElementById('a-name')?.value?.trim()
+  const email    = document.getElementById('a-email')?.value?.trim()
+  const cc       = document.getElementById('a-phone-cc')?.value || '+972'
+  const phoneRaw = document.getElementById('a-phone')?.value?.trim()
+  const phone    = phoneRaw ? cc + phoneRaw.replace(/^0/,'') : ''
+  const relation = document.getElementById('a-relation')?.value?.trim()
+  const pass     = document.getElementById('a-pass')?.value
+  const pass2    = document.getElementById('a-pass2')?.value
+  const msg      = document.getElementById('auth-msg')
+  if (!name || !email || !pass) { msg.innerHTML='<div class="auth-err">נא למלא שם, מייל וסיסמה</div>'; return }
+  if (pass !== pass2) { msg.innerHTML='<div class="auth-err">הסיסמאות אינן תואמות</div>'; return }
+  if (pass.length < 6) { msg.innerHTML='<div class="auth-err">הסיסמה חייבת להכיל לפחות 6 תווים</div>'; return }
+  const {data,error} = await sb.auth.signUp({email, password:pass, options:{data:{full_name:name}}})
+  if (error) { msg.innerHTML=`<div class="auth-err">${t('registerErr')}: ${error.message}</div>`; return }
+  if (data.user) {
+    await sb.from('mishnayot_profiles').upsert({id:data.user.id, full_name:name, phone, relation})
   }
   msg.innerHTML=`<div class="auth-ok">${t('checkEmail')}</div>`
 }
