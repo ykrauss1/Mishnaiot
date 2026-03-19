@@ -222,6 +222,11 @@ const SEDARIM = {
   en:['Zeraim','Moed','Nashim','Nezikin','Kodashim','Taharot']
 }
 
+const HEB_MONTHS = ['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר א','אדר ב']
+const HEB_DAYS   = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','יא','יב','יג','יד','טו','טז','יז','יח','יט','כ','כא','כב','כג','כד','כה','כו','כז','כח','כט','ל']
+const HEB_YEARS  = ['תשפד','תשפה','תשפו','תשפז','תשפח','תשפט','תשצ']
+const HEB_YEARS_DISPLAY = ['תשפ"ד','תשפ"ה','תשפ"ו','תשפ"ז','תשפ"ח','תשפ"ט','תש"צ']
+
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
@@ -575,9 +580,9 @@ function renderCreatorPanel() {
 // NEW DECEASED FORM
 // ══════════════════════════════════════════
 function renderNewDeceased() {
-  const HEB_MONTHS = ['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר א\'','אדר ב\'']
-  const HEB_DAYS   = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ז\'','ח\'','ט\'','י\'','י"א','י"ב','י"ג','י"ד','ט"ו','ט"ז','י"ז','י"ח','י"ט','כ\'','כ"א','כ"ב','כ"ג','כ"ד','כ"ה','כ"ו','כ"ז','כ"ח','כ"ט','ל\'']
-  const HEB_YEARS  = ['תשפ"ד','תשפ"ה','תשפ"ו','תשפ"ז','תשפ"ח','תשפ"ט','תש"צ']
+  // HEB_MONTHS defined globally
+  // HEB_DAYS defined globally
+  // HEB_YEARS defined globally
 
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
@@ -637,19 +642,19 @@ function renderNewDeceased() {
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">יום</label>
               <select id="heb-day" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${HEB_DAYS.map((d,i)=>`<option value="${i+1}">${d}</option>`).join('')}
+                ${HEB_DAYS.map((d,i)=>`<option value='${i+1}'>${d}</option>`).join('')}
               </select>
             </div>
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">חודש</label>
               <select id="heb-month" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:12px;font-family:'Heebo',sans-serif">
-                ${HEB_MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}
+                ${HEB_MONTHS.map((m,i)=>`<option value='${i+1}'>${m}</option>`).join('')}
               </select>
             </div>
             <div>
               <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">שנה</label>
               <select id="heb-year" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${HEB_YEARS.map(y=>`<option value="${y}" ${y==='תשפ"ו'?'selected':''}>${y}</option>`).join('')}
+                ${HEB_YEARS_DISPLAY.map((y,i)=>`<option value='${y}' ${i===2?'selected':''}>${y}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -1048,9 +1053,7 @@ async function onHebDateChange() {
     if (!data.gy) throw new Error('המרה נכשלה')
 
     // Build Hebrew date string
-    const HEB_MONTHS_ARR = ['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר',"אדר א'",'אדר ב'']
-    const HEB_DAYS_ARR   = ["א'","ב'","ג'","ד'","ה'","ו'","ז'","ח'","ט'","י'",'י"א','י"ב','י"ג','י"ד','ט"ו','ט"ז','י"ז','י"ח','י"ט',"כ'",'כ"א','כ"ב','כ"ג','כ"ד','כ"ה','כ"ו','כ"ז','כ"ח','כ"ט',"ל'"]
-    const hebStr = HEB_DAYS_ARR[day-1] + ' ' + HEB_MONTHS_ARR[month-1] + ' ' + year
+        const hebStr = HEB_DAYS[day-1] + ' ' + HEB_MONTHS[month-1] + ' ' + year
     const gregDate = `${data.gy}-${String(data.gm).padStart(2,'0')}-${String(data.gd).padStart(2,'0')}`
 
     await setDates(hebStr, gregDate)
