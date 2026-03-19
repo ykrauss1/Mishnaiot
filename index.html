@@ -575,63 +575,135 @@ function renderCreatorPanel() {
 // NEW DECEASED FORM
 // ══════════════════════════════════════════
 function renderNewDeceased() {
+  const HEB_MONTHS = ['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר א\'','אדר ב\'']
+  const HEB_DAYS   = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ז\'','ח\'','ט\'','י\'','י"א','י"ב','י"ג','י"ד','ט"ו','ט"ז','י"ז','י"ח','י"ט','כ\'','כ"א','כ"ב','כ"ג','כ"ד','כ"ה','כ"ו','כ"ז','כ"ח','כ"ט','ל\'']
+  const HEB_YEARS  = ['תשפ"ד','תשפ"ה','תשפ"ו','תשפ"ז','תשפ"ח','תשפ"ט','תש"צ']
+
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar()}
     <div class="page-wrap">
-      <div style="margin-bottom:16px">
-        <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px">← ${t('myDeceased')}</span>
+      <div style="margin-bottom:14px">
+        <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px;display:flex;align-items:center;gap:4px">
+          ← חזרה
+        </span>
       </div>
-      <div class="page-title">צור דף נפטר</div>
+
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:32px;margin-bottom:6px">📖</div>
+        <div style="font-family:'Frank Ruhl Libre',serif;font-size:22px;font-weight:700;color:var(--blue-deep)">צור דף נפטר</div>
+        <div style="font-size:12px;color:#999;margin-top:4px">הדף יישלח לבני המשפחה לתיאום לימוד משניות</div>
+      </div>
+
       <div id="create-msg"></div>
 
-      <div class="card-box" style="margin-bottom:12px">
-        <div class="card-title">פרטי הנפטר</div>
-        <div class="form-group">
-          <label>שם הנפטר (עברית)</label>
-          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)">
+      <!-- שם הנפטר -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+          <span>👤</span> שם הנפטר
         </div>
         <div class="form-group">
-          <label>שם (אנגלית, אופציונלי)</label>
+          <label>בעברית</label>
+          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)" style="font-family:'Frank Ruhl Libre',serif;font-size:16px">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>באנגלית (אופציונלי)</label>
           <input id="d-name-en" placeholder="R' Yosef ben Avraham" dir="ltr">
         </div>
       </div>
 
-      <div class="card-box" style="margin-bottom:12px">
-        <div class="card-title">תאריכים</div>
-        <div class="form-group">
-          <label>תאריך פטירה (עברי)</label>
-          <input id="d-heb-date" placeholder='כגון: ט"ז שבט תשפ"ו'>
-          <small style="color:#AAA">לחיפוש המרה: <a href="https://www.hebcal.com/converter" target="_blank" style="color:var(--blue-mid)">hebcal.com/converter</a></small>
+      <!-- תאריך פטירה -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;border:1.5px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+          <span>📅</span> תאריך פטירה
         </div>
-        <div class="form-group">
-          <label>תאריך פטירה (לועזי)</label>
-          <input id="d-death" type="date" onchange="calcDay30(this.value)">
-          <small style="color:#AAA">לחישוב אוטומטי של יום השלושים</small>
-        </div>
-        <div class="form-group">
-          <label>יום השלושים (עברי)</label>
-          <div style="position:relative">
-            <input id="d-day30" placeholder="יחושב אוטומטית...">
-            <span id="d-day30-loader" style="display:none;position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#888">מחשב...</span>
+
+        <!-- Toggle עברי/לועזי -->
+        <div style="display:flex;background:#F0F0F0;border-radius:8px;padding:3px;margin-bottom:14px">
+          <div id="tab-heb" onclick="setDateMode('heb')"
+            style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--blue-deep);color:#fff">
+            עברי
           </div>
+          <div id="tab-greg" onclick="setDateMode('greg')"
+            style="flex:1;text-align:center;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#888">
+            לועזי
+          </div>
+        </div>
+
+        <!-- בחירת תאריך עברי -->
+        <div id="heb-picker">
+          <label style="font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:6px">בחר תאריך עברי</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+            <div>
+              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">יום</label>
+              <select id="heb-day" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
+                ${HEB_DAYS.map((d,i)=>`<option value="${i+1}">${d}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">חודש</label>
+              <select id="heb-month" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:12px;font-family:'Heebo',sans-serif">
+                ${HEB_MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">שנה</label>
+              <select id="heb-year" onchange="onHebDateChange()" style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
+                ${HEB_YEARS.map(y=>`<option value="${y}" ${y==='תשפ"ו'?'selected':''}>${y}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- בחירת תאריך לועזי -->
+        <div id="greg-picker" style="display:none">
+          <div class="form-group" style="margin-bottom:0">
+            <label>תאריך לועזי</label>
+            <input id="d-death-greg" type="date" onchange="onGregDateChange(this.value)">
+          </div>
+        </div>
+
+        <!-- תוצאה -->
+        <div id="date-result" style="display:none;margin-top:12px;background:var(--teal-light);border-radius:8px;padding:10px 14px;border:1px solid rgba(29,107,90,.2)">
+          <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:4px">תאריכים שחושבו:</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px">
+            <span>פטירה: <strong id="res-death-heb"></strong></span>
+            <span id="res-death-greg" style="color:#888"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px">
+            <span>יום השלושים: <strong id="res-day30-heb" style="color:var(--gold)"></strong></span>
+            <span id="res-day30-greg" style="color:#888"></span>
+          </div>
+        </div>
+        <div id="date-loading" style="display:none;text-align:center;padding:10px;font-size:12px;color:#888">מחשב תאריכים... ⏳</div>
+        <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:8px 12px;font-size:12px;color:#8B2020;margin-top:8px"></div>
+
+        <!-- שדות נסתרים לשמירה -->
+        <input type="hidden" id="d-heb-date">
+        <input type="hidden" id="d-day30">
+        <input type="hidden" id="d-death">
+      </div>
+
+      <!-- מזהה הדף -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;border:1.5px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px">
+          <span>🔗</span> קישור לשיתוף
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">יישלח לבני המשפחה כדי שיבחרו מסכת</div>
+        <div style="background:#F5F0E8;border-radius:8px;padding:10px 12px;font-size:11px;font-family:monospace;color:#888;margin-bottom:10px;word-break:break-all">
+          ykrauss1.github.io/Mishnaiot/?id=<strong id="slug-preview" style="color:var(--blue-deep)">...</strong>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>מזהה (נוצר אוטומטית, ניתן לשנות)</label>
+          <input id="d-slug" dir="ltr" placeholder="yosef-cohen"
+            oninput="this.dataset.manualEdit='1';this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-');document.getElementById('slug-preview').textContent=this.value||'...'">
         </div>
       </div>
 
-      <div class="card-box" style="margin-bottom:14px">
-        <div class="card-title">קישור לשיתוף</div>
-        <div class="form-group">
-          <label>מזהה הדף</label>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span style="font-size:12px;color:#888;white-space:nowrap">mishnaiot.github.io/?id=</span>
-            <input id="d-slug" placeholder="yosef-cohen" dir="ltr" style="flex:1"
-              oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')">
-          </div>
-          <small>יווצר אוטומטית מהשם. ניתן לשנות – אותיות לועזיות וקווים בלבד</small>
-        </div>
-      </div>
-
-      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()">צור דף נפטר</button>
+      <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()" style="padding:13px;font-size:15px">
+        צור דף נפטר ←
+      </button>
+      <div style="height:20px"></div>
     </div>
   </div>`
 }
@@ -932,7 +1004,113 @@ function autoSlug(name) {
     'ר':'r','ש':'sh','ת':'t','ך':'k','ם':'m','ן':'n','ף':'p','ץ':'tz'}
   let s = name.split('').map(c => map[c]||'').join('')
   s = s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)
-  if (s) slug.value = s
+  if (s) {
+    slug.value = s
+    const preview = document.getElementById('slug-preview')
+    if (preview) preview.textContent = s
+  }
+}
+
+let _dateMode = 'heb'
+function setDateMode(mode) {
+  _dateMode = mode
+  const hebP  = document.getElementById('heb-picker')
+  const gregP = document.getElementById('greg-picker')
+  const tabH  = document.getElementById('tab-heb')
+  const tabG  = document.getElementById('tab-greg')
+  if (!hebP) return
+  if (mode === 'heb') {
+    hebP.style.display = 'block'; gregP.style.display = 'none'
+    tabH.style.background = 'var(--blue-deep)'; tabH.style.color = '#fff'
+    tabG.style.background = 'transparent'; tabG.style.color = '#888'
+    onHebDateChange()
+  } else {
+    hebP.style.display = 'none'; gregP.style.display = 'block'
+    tabG.style.background = 'var(--blue-deep)'; tabG.style.color = '#fff'
+    tabH.style.background = 'transparent'; tabH.style.color = '#888'
+  }
+}
+
+async function onHebDateChange() {
+  const day   = document.getElementById('heb-day')?.value
+  const month = document.getElementById('heb-month')?.value
+  const year  = document.getElementById('heb-year')?.value
+  if (!day || !month || !year) return
+  // Map Hebrew year to Gregorian approx for API
+  const yearMap = {'תשפ"ד':2024,'תשפ"ה':2025,'תשפ"ו':2026,'תשפ"ז':2027,'תשפ"ח':2028,'תשפ"ט':2029,'תש"צ':2030}
+  const gy = yearMap[year] || 2026
+  showDateLoading(true)
+  try {
+    // Convert Hebrew to Gregorian
+    const url = `https://www.hebcal.com/converter?cfg=json&hd=${day}&hm=${month}&hy=${gy+3760}&h2g=1`
+    const res  = await fetch(url)
+    const data = await res.json()
+    if (!data.gy) throw new Error('המרה נכשלה')
+
+    // Build Hebrew date string
+    const HEB_MONTHS_ARR = ['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר',"אדר א'",'אדר ב'']
+    const HEB_DAYS_ARR   = ["א'","ב'","ג'","ד'","ה'","ו'","ז'","ח'","ט'","י'",'י"א','י"ב','י"ג','י"ד','ט"ו','ט"ז','י"ז','י"ח','י"ט',"כ'",'כ"א','כ"ב','כ"ג','כ"ד','כ"ה','כ"ו','כ"ז','כ"ח','כ"ט',"ל'"]
+    const hebStr = HEB_DAYS_ARR[day-1] + ' ' + HEB_MONTHS_ARR[month-1] + ' ' + year
+    const gregDate = `${data.gy}-${String(data.gm).padStart(2,'0')}-${String(data.gd).padStart(2,'0')}`
+
+    await setDates(hebStr, gregDate)
+  } catch(e) {
+    showDateErr('שגיאה בחישוב התאריך – נסה שוב')
+  } finally {
+    showDateLoading(false)
+  }
+}
+
+async function onGregDateChange(dateStr) {
+  if (!dateStr) return
+  showDateLoading(true)
+  try {
+    const res  = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${dateStr.slice(0,4)}&gm=${parseInt(dateStr.slice(5,7))}&gd=${parseInt(dateStr.slice(8,10))}&g2h=1`)
+    const data = await res.json()
+    if (!data.hebrew) throw new Error('המרה נכשלה')
+    await setDates(data.hebrew, dateStr)
+  } catch(e) {
+    showDateErr('שגיאה בחישוב התאריך')
+  } finally {
+    showDateLoading(false)
+  }
+}
+
+async function setDates(hebStr, gregStr) {
+  // Save to hidden fields
+  document.getElementById('d-heb-date').value = hebStr
+  document.getElementById('d-death').value    = gregStr
+
+  // Calculate day 30
+  const d30 = new Date(gregStr + 'T12:00:00')
+  d30.setDate(d30.getDate() + 30)
+  const d30Str = d30.toISOString().slice(0,10)
+
+  // Get Hebrew date for day 30
+  const res  = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${d30.getFullYear()}&gm=${d30.getMonth()+1}&gd=${d30.getDate()}&g2h=1`)
+  const data = await res.json()
+  const day30Heb = data.hebrew || ''
+
+  document.getElementById('d-day30').value = day30Heb
+
+  // Show results
+  document.getElementById('date-result').style.display = 'block'
+  document.getElementById('date-err').style.display    = 'none'
+  document.getElementById('res-death-heb').textContent = hebStr
+  document.getElementById('res-death-greg').textContent = new Date(gregStr+'T12:00:00').toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric'})
+  document.getElementById('res-day30-heb').textContent  = day30Heb
+  document.getElementById('res-day30-greg').textContent = d30.toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric'})
+}
+
+function showDateLoading(show) {
+  const l = document.getElementById('date-loading')
+  const r = document.getElementById('date-result')
+  if (l) l.style.display = show ? 'block' : 'none'
+  if (r && show) r.style.display = 'none'
+}
+function showDateErr(msg) {
+  const el = document.getElementById('date-err')
+  if (el) { el.textContent = msg; el.style.display = 'block' }
 }
 
 async function calcDay30(dateStr) {
@@ -1008,15 +1186,17 @@ async function doLogout() {
 }
 
 async function doCreateDeceased() {
-  const nameHe=document.getElementById('d-name-he')?.value?.trim()
-  const nameEn=document.getElementById('d-name-en')?.value?.trim()
-  const deathDate=document.getElementById('d-death')?.value
-  const hebDate=document.getElementById('d-heb-date')?.value?.trim()
-  const day30Heb=document.getElementById('d-day30')?.value?.trim()
-  const slug=document.getElementById('d-slug')?.value?.trim()
-  const msg=document.getElementById('create-msg')
-  if(!nameHe||!deathDate||!hebDate||!day30Heb||!slug){
-    msg.innerHTML='<div class="auth-err">נא למלא את כל השדות</div>';return}
+  const nameHe   = document.getElementById('d-name-he')?.value?.trim()
+  const nameEn   = document.getElementById('d-name-en')?.value?.trim()
+  const deathDate= document.getElementById('d-death')?.value?.trim()
+  const hebDate  = document.getElementById('d-heb-date')?.value?.trim()
+  const day30Heb = document.getElementById('d-day30')?.value?.trim()
+  const slug     = document.getElementById('d-slug')?.value?.trim()
+  const msg      = document.getElementById('create-msg')
+  if (!nameHe) { msg.innerHTML='<div class="auth-err">נא להזין את שם הנפטר</div>'; return }
+  if (!hebDate || !deathDate) { msg.innerHTML='<div class="auth-err">נא לבחור תאריך פטירה</div>'; return }
+  if (!day30Heb) { msg.innerHTML='<div class="auth-err">יום השלושים לא חושב – המתן לחישוב</div>'; return }
+  if (!slug) { msg.innerHTML='<div class="auth-err">נא להמתין ליצירת מזהה הדף</div>'; return }
   const btn=document.getElementById('create-btn')
   btn.disabled=true; btn.textContent=t('creating')
   const {data:dec,error}=await sb.from('deceased').insert({
