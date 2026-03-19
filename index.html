@@ -350,17 +350,27 @@ const t = k => L[lang][k] || k
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
-async function init() {
+async function init().catch(e => {
+  console.error('Init error:', e)
+  document.getElementById('app').innerHTML = 
+    '<div style="text-align:center;padding:60px"><div style="font-size:32px;margin-bottom:12px">📖</div>' +
+    '<div style="font-family:serif;font-size:18px;color:#1B3A5C;margin-bottom:8px">לימוד משניות לעילוי נשמה</div>' +
+    '<div style="font-size:12px;color:#888">שגיאת טעינה: ' + e.message + '</div></div>'
+}) {
   const params = new URLSearchParams(location.search)
   const slug   = params.get('id')
   const meId   = params.get('me')
 
   // Check auth state
-  const { data: { session } } = await sb.auth.getSession()
-  if (session?.user) {
-    authUser = session.user
-    const { data: p } = await sb.from('mishnayot_profiles').select('*').eq('id', authUser.id).single()
-    profile = p
+  try {
+    const { data: { session } } = await sb.auth.getSession()
+    if (session?.user) {
+      authUser = session.user
+      const { data: p } = await sb.from('mishnayot_profiles').select('*').eq('id', authUser.id).single()
+      profile = p
+    }
+  } catch(e) {
+    console.warn('Auth error:', e)
   }
 
   // Restore learner identity from URL
@@ -946,7 +956,7 @@ async function doDelete(id) {
 
 async function loadSuperadminData() {
   const [{data:pages},{data:users},{data:learners}]=await Promise.all([
-    sb.from('deceased').select('*,profiles(full_name,email,phone)',{count:'exact'}),
+    sb.from('deceased').select('*,mishnayot_profiles(full_name,phone)',{count:'exact'}),
     sb.from('mishnayot_profiles').select('*',{count:'exact'}),
     sb.from('learners').select('id',{count:'exact'}),
   ])
