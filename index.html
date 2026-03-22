@@ -584,20 +584,44 @@ function renderRegisterForm() {
 // ══════════════════════════════════════════
 function renderCreatorPanel() {
   const isSA = profile?.is_superadmin
+  const userName = profile?.full_name || authUser?.email || ''
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar(isSA ? `<span class="top-link" onclick="view='superadmin';render()">${t('superadmin')}</span>` : '')}
-    <div class="page-wrap">
-      <div class="page-title">${t('myDeceased')}</div>
-      ${profile ? `
-      <div class="card-box" style="margin-bottom:12px;padding:10px 14px">
-        <div style="font-size:13px;font-weight:600">${profile.full_name}</div>
-        <div style="font-size:11px;color:#888;margin-top:2px">${authUser?.email} ${profile.phone?'· '+profile.phone:''}</div>
-      </div>` : ''}
-      <button class="btn btn-teal btn-full" style="margin-bottom:14px" onclick="view='new-deceased';render()">
-        ${t('newDeceased')}
-      </button>
-      <div id="my-deceased-list"><div style="color:#AAA;font-size:12px;text-align:center;padding:20px">${t('loading')}</div></div>
+    <div class="page-wrap" style="max-width:640px;margin:0 auto;width:100%">
+
+      <!-- Welcome bar -->
+      <div style="background:linear-gradient(135deg,var(--blue-deep),#2E5A8E);border-radius:12px;padding:16px 18px;margin-bottom:16px;color:#fff;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:2px">${isSA ? '👑 סופר-מנהל' : 'מנהל דף'}</div>
+          <div style="font-family:'Frank Ruhl Libre',serif;font-size:17px;font-weight:700">${userName}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:1px">${authUser?.email || ''}</div>
+        </div>
+        ${profile?.phone ? `<div style="font-size:12px;color:rgba(255,255,255,0.7)">${profile.phone}</div>` : ''}
+      </div>
+
+      <!-- New deceased button - styled nicely -->
+      <div style="background:#fff;border-radius:12px;padding:14px 18px;margin-bottom:14px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s"
+        onclick="view='new-deceased';render()"
+        onmouseover="this.style.borderColor='var(--teal)'"
+        onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;background:var(--teal-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📖</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--blue-deep)">${t('newDeceased')}</div>
+            <div style="font-size:11px;color:#888;margin-top:1px">צור דף לימוד ושתף עם המשפחה</div>
+          </div>
+        </div>
+        <div style="color:var(--teal);font-size:20px">←</div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${t('myDeceased')}</div>
+      <div id="my-deceased-list">
+        <div style="color:#AAA;font-size:12px;text-align:center;padding:30px">
+          <div style="font-size:24px;margin-bottom:8px">⏳</div>
+          ${t('loading')}
+        </div>
+      </div>
     </div>
   </div>`
 }
@@ -607,130 +631,118 @@ function renderCreatorPanel() {
 // ══════════════════════════════════════════
 function renderNewDeceased() {
   const dayOpts   = HEB_DAYS.map((d,i) => `<option value='${i+1}'>${d}</option>`).join('')
-  const monthOpts = HEB_MONTHS.map((m,i) => `<option value='${i+1}'>${m}</option>`).join('')
+  const monthOpts = HEB_MONTHS.slice(0,12).map((m,i) => `<option value='${i+1}'>${m}</option>`).join('')
   const yearOpts  = HEB_YEARS_DISPLAY.map((y,i) => `<option value='${y}' ${i===2?'selected':''}>${y}</option>`).join('')
 
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar()}
-    <div class="page-wrap" style="max-width:640px;margin:0 auto;width:100%">
+    <div style="flex:1;overflow-y:auto;padding:14px">
+    <div style="max-width:560px;margin:0 auto">
+
       <div style="margin-bottom:14px">
         <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px">← חזרה</span>
       </div>
 
       <div style="text-align:center;margin-bottom:18px">
-        <div style="font-size:28px;margin-bottom:4px">📖</div>
+        <div style="font-size:26px;margin-bottom:4px">📖</div>
         <div style="font-family:'Frank Ruhl Libre',serif;font-size:20px;font-weight:700;color:var(--blue-deep)">צור דף נפטר</div>
         <div style="font-size:11px;color:#999;margin-top:3px">הדף יישלח לבני המשפחה לתיאום לימוד משניות</div>
       </div>
 
       <div id="create-msg"></div>
 
-      <!-- שם הנפטר -->
-      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1.5px solid var(--border)">
-        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">👤 שם הנפטר</div>
+      <!-- שם -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:10px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 שם הנפטר</div>
         <div class="form-group">
           <label>בעברית</label>
-          <input id="d-name-he" placeholder="ר' יוסף בן אברהם" oninput="autoSlug(this.value)"
-            style="font-family:'Frank Ruhl Libre',serif;font-size:15px">
+          <input id="d-name-he" placeholder="משה בן חיים" oninput="autoSlug(this.value)"
+            style="font-family:'Frank Ruhl Libre',serif;font-size:16px">
         </div>
         <div class="form-group" style="margin-bottom:0">
           <label>באנגלית (אופציונלי)</label>
-          <input id="d-name-en" placeholder="R' Yosef ben Avraham" dir="ltr">
+          <input id="d-name-en" placeholder="Moshe ben Haim" dir="ltr">
         </div>
       </div>
 
-      <!-- תאריך פטירה -->
-      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1.5px solid var(--border)">
-        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📅 תאריך פטירה</div>
+      <!-- תאריך -->
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:10px;border:1.5px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📅 תאריך פטירה</div>
 
-        <!-- Toggle -->
-        <div style="display:flex;background:#F0F0F0;border-radius:8px;padding:3px;margin-bottom:12px;width:200px">
+        <div style="display:flex;background:#F0F0F0;border-radius:8px;padding:3px;margin-bottom:14px;width:fit-content">
           <div id="tab-heb" onclick="setDateMode('heb')"
-            style="flex:1;text-align:center;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--blue-deep);color:#fff;transition:all .2s">
-            עברי
-          </div>
+            style="padding:6px 18px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--blue-deep);color:#fff;transition:all .2s">עברי</div>
           <div id="tab-greg" onclick="setDateMode('greg')"
-            style="flex:1;text-align:center;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#888;transition:all .2s">
-            לועזי
-          </div>
+            style="padding:6px 18px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#888;transition:all .2s">לועזי</div>
         </div>
 
-        <!-- בחירת תאריך עברי -->
         <div id="heb-picker">
-          <div style="display:grid;grid-template-columns:80px 1fr 110px;gap:8px">
+          <div style="display:grid;grid-template-columns:90px auto 120px;gap:8px;align-items:end">
             <div>
-              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">יום</label>
+              <div style="font-size:10px;color:#999;margin-bottom:3px">יום</div>
               <select id="heb-day" onchange="onHebDateChange()"
-                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${dayOpts}
-              </select>
+                style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">${dayOpts}</select>
             </div>
             <div>
-              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">חודש</label>
+              <div style="font-size:10px;color:#999;margin-bottom:3px">חודש</div>
               <select id="heb-month" onchange="onHebDateChange()"
-                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${monthOpts}
-              </select>
+                style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">${monthOpts}</select>
             </div>
             <div>
-              <label style="font-size:10px;color:#999;display:block;margin-bottom:3px">שנה</label>
-              <select id="heb-year" onchange="onHebDateChange()"
-                style="width:100%;padding:8px 4px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">
-                ${yearOpts}
-              </select>
+              <div style="font-size:10px;color:#999;margin-bottom:3px">שנה</div>
+              <select id="heb-year" onchange="updateMonthList();onHebDateChange()"
+                style="width:100%;padding:9px 6px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Heebo',sans-serif">${yearOpts}</select>
             </div>
           </div>
         </div>
 
-        <!-- בחירת תאריך לועזי -->
         <div id="greg-picker" style="display:none">
           <input id="d-death-greg" type="date" onchange="onGregDateChange(this.value)"
             style="width:100%;padding:9px 11px;border:1.5px solid #DDD;border-radius:8px;font-size:13px">
         </div>
 
-        <!-- תוצאה -->
-        <div id="date-loading" style="display:none;text-align:center;padding:8px;font-size:11px;color:#888;margin-top:8px">מחשב... ⏳</div>
-        <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:7px 10px;font-size:11px;color:#8B2020;margin-top:8px"></div>
-        <div id="date-result" style="display:none;margin-top:10px">
-          <div style="background:var(--teal-light);border-radius:8px;padding:8px 12px;border:1px solid rgba(29,107,90,.2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:10px;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:.3px">תאריך פטירה</span>
+        <div id="date-loading" style="display:none;text-align:center;padding:10px;font-size:11px;color:#888;margin-top:8px">מחשב תאריכים... ⏳</div>
+        <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:8px 12px;font-size:11px;color:#8B2020;margin-top:8px"></div>
+
+        <div id="date-result" style="display:none;margin-top:12px">
+          <div style="background:#F8F6F0;border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:#888">תאריך פטירה</span>
             <span>
-              <strong id="res-death-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:14px"></strong>
+              <strong id="res-death-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:14px;color:var(--ink)"></strong>
               <span id="res-death-greg" style="color:#888;font-size:11px;margin-right:8px"></span>
             </span>
           </div>
-          <div style="background:linear-gradient(135deg,#1B3A5C,#243B55);border-radius:10px;padding:12px 16px;text-align:center">
-            <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">יום השלושים</div>
-            <div id="res-day30-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:22px;font-weight:700;color:var(--gold-light)"></div>
-            <div id="res-day30-greg" style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:3px"></div>
+          <div style="background:linear-gradient(135deg,var(--blue-deep),#243B55);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">יום השלושים</div>
+            <div id="res-day30-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:24px;font-weight:900;color:var(--gold-light)"></div>
+            <div id="res-day30-greg" style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px"></div>
           </div>
         </div>
 
-        <!-- שדות נסתרים -->
         <input type="hidden" id="d-heb-date">
         <input type="hidden" id="d-day30">
         <input type="hidden" id="d-death">
       </div>
 
       <!-- קישור -->
-      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;border:1.5px solid var(--border)">
+      <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;border:1.5px solid var(--border)">
         <div style="font-size:10px;font-weight:700;color:var(--blue-deep);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🔗 קישור לשיתוף</div>
-        <div style="background:#F5F0E8;border-radius:7px;padding:8px 10px;font-size:11px;color:#888;margin-bottom:8px;word-break:break-all;font-family:monospace">
-          .../?id=<strong id="slug-preview" style="color:var(--blue-deep)">...</strong>
+        <div style="background:#F5F0E8;border-radius:7px;padding:8px 12px;font-size:11px;color:#888;margin-bottom:8px;font-family:monospace;direction:ltr;text-align:left">
+          ykrauss1.github.io/Mishnaiot/?id=<strong id="slug-preview" style="color:var(--blue-deep)">...</strong>
         </div>
         <div class="form-group" style="margin-bottom:0">
-          <label>מזהה (נוצר אוטומטית)</label>
-          <input id="d-slug" dir="ltr" placeholder="yosef-cohen"
+          <label>מזהה (נוצר אוטומטית, ניתן לשנות)</label>
+          <input id="d-slug" dir="ltr" placeholder="moshe-ben-haim"
             oninput="this.dataset.manualEdit='1';this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-');document.getElementById('slug-preview').textContent=this.value||'...'">
         </div>
       </div>
 
       <button class="btn btn-primary btn-full" id="create-btn" onclick="doCreateDeceased()"
-        style="padding:12px;font-size:14px;border-radius:10px">
+        style="padding:13px;font-size:15px;border-radius:10px;margin-bottom:24px">
         צור דף נפטר ←
       </button>
-      <div style="height:24px"></div>
+    </div>
     </div>
   </div>`
 }
@@ -1025,16 +1037,23 @@ function togglePass(inputId, eyeId) {
 function autoSlug(name) {
   const slug = document.getElementById('d-slug')
   if (!slug || slug.dataset.manualEdit) return
-  const map = {
+  // Remove common prefixes/suffixes
+  let clean = name
+    .replace(/^ר['’`]\s*/u, '')
+    .replace(/\s*ז["״]\s*ל\s*$/u, '')
+    .trim()
+  // Hebrew to Latin map - word-by-word for better results
+  const words = {'בן':'ben','בת':'bat','בר':'bar'}
+  const letters = {
     'א':'a','ב':'b','ג':'g','ד':'d','ה':'h','ו':'v','ז':'z','ח':'ch','ט':'t',
     'י':'y','כ':'k','ל':'l','מ':'m','נ':'n','ס':'s','ע':'','פ':'p','צ':'tz','ק':'k',
-    'ר':'r','ש':'sh','ת':'t','ך':'ch','ם':'m','ן':'n','ף':'f','ץ':'tz',
-    "'":"","'":"",'`':"",' ':'-','"':''
+    'ר':'r','ש':'sh','ת':'t','ך':'ch','ם':'m','ן':'n','ף':'f','ץ':'tz'
   }
-  // Remove common prefixes like ר' and suffixes like ז"ל
-  let clean = name.replace(/^ר[''`]\s*/,'').replace(/\s*ז[""]\s*ל\s*$/, '')
-  let s = clean.split('').map(c => map.hasOwnProperty(c) ? map[c] : (c===' '?'-':'')).join('')
-  s = s.toLowerCase().replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,50)
+  const parts = clean.split(/\s+/).map(w => {
+    if (words[w]) return words[w]
+    return w.split('').map(c => letters[c] !== undefined ? letters[c] : '').join('')
+  }).filter(Boolean)
+  let s = parts.join('-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,50)
   if (s) {
     slug.value = s
     const preview = document.getElementById('slug-preview')
@@ -1244,6 +1263,7 @@ async function doCreateDeceased() {
 }
 
 async function loadMyDeceased() {
+  await new Promise(r => setTimeout(r, 100))  // wait for DOM
   const el=document.getElementById('my-deceased-list'); if(!el)return
   const {data}=await sb.from('deceased').select(`
     *, assignments(id, learner_slots(id,status))
@@ -1373,10 +1393,19 @@ function daysLeft(d){const dt=new Date(d+'T12:00:00');dt.setDate(dt.getDate()+30
 
 // Listen for auth changes
 sb.auth.onAuthStateChange(async(event,session)=>{
-  if(event==='SIGNED_IN'&&session?.user&&!authUser){
+  console.log('auth event:', event)
+  if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session?.user){
     authUser=session.user
     const {data:p}=await sb.from('mishnayot_profiles').select('*').eq('id',authUser.id).single()
     profile=p
+    console.log('auth: profile loaded', p?.full_name)
+    if(view==='loading'||view==='auth'){
+      view='creator-panel'; render()
+    }
+  }
+  if(event==='SIGNED_OUT'){
+    authUser=null; profile=null
+    if(view==='creator-panel'||view==='superadmin'){ view='auth'; render() }
   }
 })
 
