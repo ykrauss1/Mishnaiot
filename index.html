@@ -369,17 +369,23 @@ const _loadTimeout = setTimeout(() => {
 }, 8000)
 
 async function init() {
+  console.log('init: start')
   const params = new URLSearchParams(location.search)
   const slug   = params.get('id')
   const meId   = params.get('me')
+  console.log('init: slug=', slug)
 
   // Check auth state
   try {
+    console.log('init: checking session...')
     const { data: { session } } = await sb.auth.getSession()
+    console.log('init: session=', session ? 'exists' : 'none')
     if (session?.user) {
       authUser = session.user
+      console.log('init: loading profile...')
       const { data: p } = await sb.from('mishnayot_profiles').select('*').eq('id', authUser.id).single()
       profile = p
+      console.log('init: profile=', p)
     }
   } catch(e) {
     console.warn('Auth error:', e)
@@ -391,19 +397,23 @@ async function init() {
     if (data) { me = data; localStorage.setItem('mishnayot_me', JSON.stringify(data)) }
   }
 
+  console.log('init: no slug, authUser=', authUser ? 'yes' : 'no')
   if (!slug) {
     if (isDev) { loadDemoData(); view='deceased'; render(); return }
     view = authUser ? 'creator-panel' : 'auth'
+    console.log('init: setting view=', view)
     render(); return
   }
 
   if (slug === 'demo') { loadDemoData(); view='deceased'; render(); return }
 
+  console.log('init: loading deceased...')
   const { data: dec } = await sb.from('deceased').select('*').eq('unique_slug', slug).single()
   if (!dec) { document.getElementById('app').innerHTML='<div style="text-align:center;padding:60px;color:#888">'+t('notFound')+'</div>'; return }
   deceased = dec
   await loadAssignments()
   view = 'deceased'; render()
+  console.log('init: done')
 }
 async function loadAssignments() {
   const { data } = await sb.from('assignments')
