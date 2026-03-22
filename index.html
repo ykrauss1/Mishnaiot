@@ -375,10 +375,14 @@ async function init() {
   const meId   = params.get('me')
   console.log('init: slug=', slug)
 
-  // Check auth state
+  // Check auth state – with 5s timeout so it never blocks
   try {
     console.log('init: checking session...')
-    const { data: { session } } = await sb.auth.getSession()
+    const sessionResult = await Promise.race([
+      sb.auth.getSession(),
+      new Promise(resolve => setTimeout(() => { console.warn('session timeout'); resolve({data:{session:null}}) }, 5000))
+    ])
+    const session = sessionResult?.data?.session
     console.log('init: session=', session ? 'exists' : 'none')
     if (session?.user) {
       authUser = session.user
