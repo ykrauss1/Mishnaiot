@@ -599,7 +599,7 @@ function renderNewDeceased() {
   return `
   <div style="display:flex;flex-direction:column;height:100vh;overflow:hidden">
     ${topbar()}
-    <div class="page-wrap" style="max-width:480px;margin:0 auto;width:100%">
+    <div class="page-wrap" style="max-width:640px;margin:0 auto;width:100%">
       <div style="margin-bottom:14px">
         <span onclick="view='creator-panel';render()" style="cursor:pointer;color:var(--blue-mid);font-size:13px">← חזרה</span>
       </div>
@@ -678,16 +678,18 @@ function renderNewDeceased() {
         <!-- תוצאה -->
         <div id="date-loading" style="display:none;text-align:center;padding:8px;font-size:11px;color:#888;margin-top:8px">מחשב... ⏳</div>
         <div id="date-err" style="display:none;background:#FFF0F0;border-radius:7px;padding:7px 10px;font-size:11px;color:#8B2020;margin-top:8px"></div>
-        <div id="date-result" style="display:none;margin-top:10px;background:var(--teal-light);border-radius:8px;padding:10px 12px;border:1px solid rgba(29,107,90,.2)">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
-            <span style="color:#888;font-size:10px">פטירה</span>
-            <span><strong id="res-death-heb" style="font-family:'Frank Ruhl Libre',serif"></strong>
-              <span id="res-death-greg" style="color:#888;font-size:10px;margin-right:6px"></span></span>
+        <div id="date-result" style="display:none;margin-top:10px">
+          <div style="background:var(--teal-light);border-radius:8px;padding:8px 12px;border:1px solid rgba(29,107,90,.2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:.3px">תאריך פטירה</span>
+            <span>
+              <strong id="res-death-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:14px"></strong>
+              <span id="res-death-greg" style="color:#888;font-size:11px;margin-right:8px"></span>
+            </span>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
-            <span style="color:#888;font-size:10px">יום השלושים</span>
-            <span><strong id="res-day30-heb" style="color:var(--gold);font-family:'Frank Ruhl Libre',serif"></strong>
-              <span id="res-day30-greg" style="color:#888;font-size:10px;margin-right:6px"></span></span>
+          <div style="background:linear-gradient(135deg,#1B3A5C,#243B55);border-radius:10px;padding:12px 16px;text-align:center">
+            <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">יום השלושים</div>
+            <div id="res-day30-heb" style="font-family:'Frank Ruhl Libre',serif;font-size:22px;font-weight:700;color:var(--gold-light)"></div>
+            <div id="res-day30-greg" style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:3px"></div>
           </div>
         </div>
 
@@ -1009,12 +1011,16 @@ function togglePass(inputId, eyeId) {
 function autoSlug(name) {
   const slug = document.getElementById('d-slug')
   if (!slug || slug.dataset.manualEdit) return
-  // Transliterate common Hebrew letters
-  const map = {'א':'a','ב':'b','ג':'g','ד':'d','ה':'h','ו':'v','ז':'z','ח':'ch','ט':'t',
-    'י':'y','כ':'k','ל':'l','מ':'m','נ':'n','ס':'s','ע':'a','פ':'p','צ':'tz','ק':'k',
-    'ר':'r','ש':'sh','ת':'t','ך':'k','ם':'m','ן':'n','ף':'p','ץ':'tz'}
-  let s = name.split('').map(c => map[c]||'').join('')
-  s = s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)
+  const map = {
+    'א':'a','ב':'b','ג':'g','ד':'d','ה':'h','ו':'v','ז':'z','ח':'ch','ט':'t',
+    'י':'y','כ':'k','ל':'l','מ':'m','נ':'n','ס':'s','ע':'','פ':'p','צ':'tz','ק':'k',
+    'ר':'r','ש':'sh','ת':'t','ך':'ch','ם':'m','ן':'n','ף':'f','ץ':'tz',
+    "'":"","'":"",'`':"",' ':'-','"':''
+  }
+  // Remove common prefixes like ר' and suffixes like ז"ל
+  let clean = name.replace(/^ר[''`]\s*/,'').replace(/\s*ז[""]\s*ל\s*$/, '')
+  let s = clean.split('').map(c => map.hasOwnProperty(c) ? map[c] : (c===' '?'-':'')).join('')
+  s = s.toLowerCase().replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,50)
   if (s) {
     slug.value = s
     const preview = document.getElementById('slug-preview')
